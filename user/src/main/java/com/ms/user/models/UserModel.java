@@ -19,6 +19,10 @@ public class UserModel {
 	private String name;
 	private String email;
 	
+	public UserModel() {
+		
+	}
+	
 	public UserModel(UUID userId, String name, String email) {
 		super();
 		this.userId = userId;
