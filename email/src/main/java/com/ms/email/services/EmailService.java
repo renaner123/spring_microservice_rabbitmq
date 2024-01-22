@@ -2,7 +2,6 @@ package com.ms.email.services;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -17,11 +16,13 @@ import com.ms.email.repositories.EmailRepository;
 @Service
 public class EmailService {
 
-	@Autowired
-    EmailRepository emailRepository;
-    
-	@Autowired
-	JavaMailSender emailSender;
+    final EmailRepository emailRepository;
+    final JavaMailSender emailSender;
+
+    public EmailService(EmailRepository emailRepository, JavaMailSender emailSender) {
+        this.emailRepository = emailRepository;
+        this.emailSender = emailSender;
+    }
 
     @Value(value = "${spring.mail.username}")
     private String emailFrom;
