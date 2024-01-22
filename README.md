@@ -3,10 +3,10 @@
 <a name="readme-top"></a>
 
 <details>
-  <summary>Table of Contents</summary>
+  <summary>Table of Content</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#table-of-content">Table of Content</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
       </ul>
@@ -23,15 +23,15 @@
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <li><a href="#useful-commands">Useful commands</a></li>
   </ol>
 </details>
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## Table of Content
 
 Este repositório contém um exemplo simples de uma arquitetura de microserviços e os passos necessários para realizar uma comunicação assíncrona entre dois microserviços utilizando mensageria e RabbitMQ. O cenário do projeto é o seguinte:
-- O microserviço User produzirá mensagens que serão enviadas para o Broker, onde o Exchange receberá a mensagem e realizará a análise da mensagem recebida; em seguida, roteia para a respectiva Queue (default). Por fim, o microserviço de e-mail, que está conectado a essa fila, consumirá as mensagens à medida que chegam. O CloudAMQP será responsável por monitorar o RabbitMQ (Broker) na nuvem (Exchange e Queue). Além disso, adicionei os microserviços em containers Docker. 
+- O microserviço User produzirá mensagens que serão enviadas para o Broker (RabbitMQ), onde o Exchange receberá a mensagem e realizará a análise da mensagem recebida; em seguida, roteia para a respectiva Queue (default). Por fim, o microserviço de e-mail, que está conectado a essa fila, consumirá as mensagens à medida que chegam. O CloudAMQP será responsável por monitorar o RabbitMQ (Broker) na nuvem (Exchange e Queue). Além disso, adicionei algus serviços em containers Docker. 
 
 ![](figs/project_flow.PNG)
 Fonte: Michelli Brito
@@ -49,6 +49,8 @@ Fonte: Michelli Brito
 - [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.9.10-brightgreen?logo=rabbitmq)](https://www.rabbitmq.com/)
 - [![CloudAMQP](https://img.shields.io/badge/CloudAMQP-Latest-yellow?logo=cloudamqp)](https://www.cloudamqp.com/)
 - [![SMTP Gmail](https://img.shields.io/badge/SMTP%20Gmail-Latest-red?logo=gmail)](https://support.google.com/a/answer/176600?hl=en)
+- [![Docker](https://img.shields.io/badge/Docker-24-blue?logo=docker)](https://www.docker.com/)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -57,57 +59,68 @@ Fonte: Michelli Brito
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+É necessário configurar as variavéis de ambiente, descritas abaixo, no sistema. A Queue do Cloud AMQP deve possuir o nome `default.email`. Caso queira usar uma fila com nome diferente, pode-se alterar diretamente no arquivo [application.properties](email\src\main\resources\application.properties).
+
+- `AMQPS_CLOUD`=url da instância do RabbitMQ na CloudAMQP
+- `GMAIL_USERNAME`=email que será utilizado para os envios de emails
+- `GMAIL_SENHA_APP`=[senha de app google](https://support.google.com/accounts/answer/185833) para autenticação do email
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+Para preparar o ambiente para execução dos microserviços é necessário inicializar um banco de dados PostgreSQL para o microserviço `User` e um para o microserviço `Email`. Para fazer isso, é necessário executar o docker compose conforme exemplo abaixo. Além dos bancos de dados, também será instanciado o microserviço `User`.
+
+``` 
+docker compose up
+```
+
+Para garantir que o microserviço de e-mail realizará o consumo das mensagens da fila do RabbitMQ, é necessário executar o microserviço fora dos containeres Docker, para isso, é necessário os seguintes passos:
+
+```shell
+cd email
+mvn clean install -DSkipTests
+java -jar target/email-0.0.1-SNAPSHOT.jar
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Com o ambiente preparado, para testar os microserviços, é necessário utilizar alguma plataforma de API e enviar um `POST` para a rota `address_container:8081/users` contendo o seguinte corpo:
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+```json
+{
+    "name": "Renan",
+    "email": "emailteste@email.com"
+}
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Como resposta, é esperado o seguinte corpo:
 
+```json
+{
+    "userId": "13ff124c-792b-491b-a231-c5aa78b103a6",
+    "name": "Renan",
+    "email": "emailtestesdevrenan@gmail.com"
+}
+```
 
+Se tudo ocorreu bem, o e-mail já deve ter recebido uma mensagem de boas vindas. A mensagem pode alterar [aqui](user\src\main\java\com\ms\user\producers\UserProducer.java)
 
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- [ ] Fazer validações dos e-emails
+- [ ] Fazer microserviço Email funcionar no ambiente docker
+- [ ] Implementar novos métodos
+- [ ] Criar testes unitários
+- [ ] Escalar os microserviços
+- [ ] Testar outros Exchanges
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -116,16 +129,14 @@ See the [open issues](https://github.com/github_username/repo_name/issues) for a
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Se você tiver uma sugestão que tornaria isso melhor, por favor, faça um fork do repositório e crie uma pull request. Você também pode simplesmente abrir um problema com a tag "melhoria".
+Obrigado!
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Faça um Fork do Projeto
+1. Crie seu Branch de Funcionalidade (`git checkout -b feature/AmazingFeature`)
+1. Faça Commits nas suas Mudanças (`git commit -m 'Add some AmazingFeature'`)
+1. Faça o Push para o Branch (`git push origin feature/AmazingFeature`)
+1. Abra uma Pull Request
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -143,28 +154,31 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
-
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Renan Rodolfo - [Linkedin](https://www.linkedin.com/in/renanrodolfo/) - rrenanrds@gmail.com
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Useful commands
 
+```shell 
+# Verificar log de um container chamado ms-user-pg
+docker logs ms-user-pg
+```
 
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
+# Acessar um container postgresql
+```shell 
+docker exec -it ms-user-pg psql -U postgres
+```
+# Iniciar um container postgresql
+```shell 
+docker run -p 5432:5432 --name ms-user-pg --network ms-rabbit -e POSTGRES_PASSWORD=123456 -e POSTGRES_DB=db_user postgres:12-alpine
+```
+# Executar um projeto maven da pasta user utilizando Dockerfile
+```shell 
+mvn clean install -DskipTests
+cd user
+docker build -t ms-user:v1 .
+docker run -p 8081:8081 --network ms-rabbit ms-user:v1
+```
 
-* []()
-* []()
-* []()
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: images/screenshot.png
 
