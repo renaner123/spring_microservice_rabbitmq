@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  ms-user:
+    build: ./user
+    ports:
+      - "8081:8081"
+    networks:
+      - ms-rabbit
+    environment:
+      - spring.rabbitmq.addresses=${AMQPS_CLOUD}
+    depends_on:
+      - ms-user-pg
+
+  ms-email:
+    build: ./email
+    ports:
+      - "8082:8082"
+    networks:
+      - ms-rabbit
+    environment:
+      - spring.rabbitmq.addresses=${AMQPS_CLOUD}
+      - spring.mail.username=${GMAIL_USERNAME}
+      - spring.mail.password=${GMAIL_SENHA_APP}
+    depends_on:
+      - ms-email-pg
+
+  ms-user-pg:
+    image: postgres:12-alpine
+    container_name: ms-user-pg
+    networks:
+      - ms-rabbit
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: db_user
+
+  ms-email-pg:
+    image: postgres:12-alpine
+    container_name: ms-email-pg
+    networks:
+      - ms-rabbit
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: db_email
+
+networks:
+  ms-rabbit:
+    driver: bridge
