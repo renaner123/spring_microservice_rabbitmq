@@ -1,4 +1,6 @@
-[![LinkedIn][linkedin-shield]][linkedin-url]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
 
 <a name="readme-top"></a>
 
@@ -62,7 +64,7 @@ Fonte: Michelli Brito
 
 ### Prerequisites
 
-É necessário configurar as variavéis de ambiente, descritas abaixo, no sistema. A Queue do Cloud AMQP deve possuir o nome `default.email`. Caso queira usar uma fila com nome diferente, pode-se alterar diretamente no arquivo [application.properties](email\src\main\resources\application.properties).
+É necessário configurar as variavéis de ambiente, descritas abaixo, no sistema. A Queue do Cloud AMQP deve possuir o nome `default.email`. Caso queira usar uma fila com nome diferente, pode-se alterar diretamente no arquivo [application.properties](./email/src/main/resources/application.properties).
 
 - `AMQPS_CLOUD`=url da instância do RabbitMQ na CloudAMQP
 - `GMAIL_USERNAME`=email que será utilizado para os envios de emails
@@ -105,11 +107,18 @@ Como resposta, é esperado o seguinte corpo:
 {
     "userId": "13ff124c-792b-491b-a231-c5aa78b103a6",
     "name": "Renan",
-    "email": "emailtestesdevrenan@gmail.com"
+    "email": "emailteste@email.com"
 }
 ```
 
-Se tudo ocorreu bem, o e-mail já deve ter recebido uma mensagem de boas vindas. A mensagem pode alterar [aqui](user\src\main\java\com\ms\user\producers\UserProducer.java)
+Se tudo ocorreu bem, o e-mail já deve ter recebido uma mensagem de boas vindas. A mensagem pode ser alterada [aqui](./user/src/main/java/com/ms/user/producers/UserProducer.java)
+
+
+Também é possível verificar no gerenciador do Cloud AMQP, em `Quueues and Streams`, se a mensagem chegou na fila e se foi despachada, conforme imagem abaixo.
+
+![](/figs/queues.PNG)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ROADMAP -->
 ## Roadmap
@@ -145,7 +154,8 @@ Obrigado!
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distribuído sob a Licença MIT. Consulte `LICENSE` para obter mais informações.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -165,15 +175,15 @@ Renan Rodolfo - [Linkedin](https://www.linkedin.com/in/renanrodolfo/) - rrenanrd
 docker logs ms-user-pg
 ```
 
-# Acessar um container postgresql
+Acessar um container postgresql
 ```shell 
 docker exec -it ms-user-pg psql -U postgres
 ```
-# Iniciar um container postgresql
+Iniciar um container postgresql
 ```shell 
 docker run -p 5432:5432 --name ms-user-pg --network ms-rabbit -e POSTGRES_PASSWORD=123456 -e POSTGRES_DB=db_user postgres:12-alpine
 ```
-# Executar um projeto maven da pasta user utilizando Dockerfile
+Executar um projeto maven da pasta user utilizando Dockerfile
 ```shell 
 mvn clean install -DskipTests
 cd user
@@ -181,4 +191,5 @@ docker build -t ms-user:v1 .
 docker run -p 8081:8081 --network ms-rabbit ms-user:v1
 ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
